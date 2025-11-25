@@ -1,0 +1,238 @@
+{% extends 'base_dashboard.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto pb-20">
+    
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'manage_lost_tickets' %}" class="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#ffa700] hover:border-[#ffa700] transition shadow-sm">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Match Finder</h1>
+            <p class="text-xs text-[#9c9c9c]">AI-powered similarity detection</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-gray-100 sticky top-6 overflow-hidden">
+                <div class="bg-gray-900 px-6 py-4 flex justify-between items-center">
+                    <span class="text-xs font-bold text-[#ffa700] uppercase tracking-widest">Target Ticket</span>
+                    <i class="fa-solid fa-crosshairs text-gray-600"></i>
+                </div>
+                
+                <div class="p-6">
+                    {% if ticket.item_image %}
+                        <div class="rounded-xl overflow-hidden mb-6 border border-gray-100 shadow-sm">
+                            <img src="{{ ticket.item_image.url }}" class="w-full h-48 object-cover">
+                        </div>
+                    {% endif %}
+                    
+                    <h3 class="text-xl font-bold text-gray-800 mb-1">{{ ticket.item_name }}</h3>
+                    <p class="text-sm font-medium text-[#ffa700] uppercase tracking-wide mb-6">{{ ticket.get_category_display }}</p>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <p class="text-xs text-gray-400 uppercase font-bold mb-1">Description</p>
+                            <p class="text-sm text-gray-700 leading-relaxed">{{ ticket.description }}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Color</p>
+                                <p class="text-sm text-gray-800">{{ ticket.color }}</p>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                <p class="text-xs text-gray-400 uppercase font-bold mb-1">Lost Date</p>
+                                <p class="text-sm text-gray-800">{{ ticket.date_lost }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 pt-4 border-t border-gray-50">
+                            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Reported by</p>
+                                <p class="text-sm font-bold text-gray-800">{{ ticket.owner.username }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-10">
+            
+            <div>
+                <div class="flex justify-between items-center mb-6 px-2">
+                    <h2 class="font-bold text-gray-800 text-lg">Suggested Findings</h2>
+                    <span class="bg-[#ffa700]/10 text-[#ffa700] text-xs font-bold px-3 py-1 rounded-full">{{ matches|length }} Matches Found</span>
+                </div>
+
+                {% if matches %}
+                    <div class="space-y-4">
+                        {% for item in matches %}
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-200 transition duration-300 group relative overflow-hidden">
+                            <div class="flex flex-col sm:flex-row gap-5 relative z-10">
+                                <div class="w-full sm:w-28 h-28 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 border border-gray-200 cursor-pointer group-hover:border-[#ffa700] transition" onclick="openModal('modal-{{ item.id }}')">
+                                    {% if item.item_image %}
+                                        <img src="{{ item.item_image.url }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                                    {% else %}
+                                        <div class="w-full h-full flex items-center justify-center text-gray-300 text-2xl"><i class="fa-regular fa-image"></i></div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="flex-grow flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex justify-between items-start">
+                                            <h3 class="text-lg font-bold text-gray-800 line-clamp-1">{{ item.item_name }}</h3>
+                                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap ml-2">
+                                                {{ item.score }}% Match
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 line-clamp-2 mt-1">{{ item.description }}</p>
+                                    </div>
+                                    
+                                    <div class="flex gap-4 mt-3 text-xs font-medium">
+                                        <span class="flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md">
+                                            <i class="fa-solid fa-location-dot text-red-500"></i> {{ item.location_found }}
+                                        </span>
+                                        <span class="flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md">
+                                            <i class="fa-solid fa-palette text-purple-500"></i> {{ item.color }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="flex sm:flex-col gap-2 justify-center min-w-[120px] border-t sm:border-t-0 sm:border-l border-gray-50 pt-3 sm:pt-0 sm:pl-3">
+                                    <a href="{% url 'confirm_match' ticket.id item.id %}" 
+                                       onclick="return confirm('Confirm match?');"
+                                       class="w-full bg-[#ffa700] text-white text-center py-2 rounded-lg text-xs font-bold shadow-md shadow-orange-200 hover:bg-orange-600 hover:shadow-lg transition flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-check"></i> Confirm
+                                    </a>
+                                    <button onclick="openModal('modal-{{ item.id }}')" class="w-full bg-white border border-gray-200 text-gray-600 text-center py-2 rounded-lg text-xs font-bold hover:bg-gray-50 hover:text-gray-900 transition flex items-center justify-center gap-2">
+                                        <i class="fa-regular fa-eye"></i> Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="modal-{{ item.id }}" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+                            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fade-in-up">
+                                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                    <h3 class="font-bold text-gray-800">Item Details</h3>
+                                    <button onclick="closeModal('modal-{{ item.id }}')" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+                                </div>
+                                <div class="p-6">
+                                    {% if item.item_image %}
+                                        <div class="rounded-xl overflow-hidden mb-4 bg-gray-100 border border-gray-200">
+                                            <img src="{{ item.item_image.url }}" class="w-full h-56 object-contain">
+                                        </div>
+                                    {% endif %}
+                                    <div class="space-y-3 text-sm">
+                                        <div><span class="block text-xs font-bold text-[#9c9c9c] uppercase">Description</span><p class="text-gray-800">{{ item.description }}</p></div>
+                                        <div><span class="block text-xs font-bold text-[#9c9c9c] uppercase">Location</span><p class="text-gray-800">{{ item.location_found }}</p></div>
+                                        <div><span class="block text-xs font-bold text-[#9c9c9c] uppercase">Date</span><p class="text-gray-800">{{ item.date_found }}</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="bg-white rounded-2xl border border-dashed border-gray-200 p-12 text-center">
+                        <i class="fa-solid fa-robot text-4xl text-gray-300 mb-3"></i>
+                        <h3 class="text-gray-900 font-bold">No Matches Found</h3>
+                        <p class="text-sm text-[#9c9c9c]">The system couldn't find similar items.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <div class="flex items-center gap-3 mb-6 px-2 pt-6 border-t border-gray-200">
+                    <h2 class="font-bold text-gray-800 text-lg">Other Findings</h2>
+                    <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">(Category & Keyword Matches)</span>
+                </div>
+
+                {% if other_findings %}
+                    <div class="space-y-4">
+                        {% for item in other_findings %}
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-200 transition duration-300 group relative overflow-hidden">
+                            <div class="flex flex-col sm:flex-row gap-5 relative z-10">
+                                <div class="w-full sm:w-28 h-28 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 border border-gray-200 cursor-pointer group-hover:border-[#ffa700] transition" onclick="openModal('modal-other-{{ item.id }}')">
+                                    {% if item.item_image %}
+                                        <img src="{{ item.item_image.url }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                                    {% else %}
+                                        <div class="w-full h-full flex items-center justify-center text-gray-300 text-2xl"><i class="fa-regular fa-image"></i></div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="flex-grow flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex justify-between items-start">
+                                            <h3 class="text-lg font-bold text-gray-800 line-clamp-1">{{ item.item_name }}</h3>
+                                            <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap ml-2">
+                                                Possible Match
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 line-clamp-2 mt-1">{{ item.description }}</p>
+                                    </div>
+                                    
+                                    <div class="flex gap-4 mt-3 text-xs font-medium">
+                                        <span class="flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md">
+                                            <i class="fa-solid fa-location-dot text-red-500"></i> {{ item.location_found }}
+                                        </span>
+                                        <span class="flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md">
+                                            <i class="fa-solid fa-palette text-purple-500"></i> {{ item.color }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="flex sm:flex-col gap-2 justify-center min-w-[120px] border-t sm:border-t-0 sm:border-l border-gray-50 pt-3 sm:pt-0 sm:pl-3">
+                                    <a href="{% url 'confirm_match' ticket.id item.id %}" 
+                                       onclick="return confirm('Link this item to the ticket?');"
+                                       class="w-full bg-[#ffa700] text-white text-center py-2 rounded-lg text-xs font-bold shadow-md shadow-orange-200 hover:bg-orange-600 hover:shadow-lg transition flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-link"></i> Link Item
+                                    </a>
+                                    <button onclick="openModal('modal-other-{{ item.id }}')" class="w-full bg-white border border-gray-200 text-gray-600 text-center py-2 rounded-lg text-xs font-bold hover:bg-gray-50 hover:text-gray-900 transition flex items-center justify-center gap-2">
+                                        <i class="fa-regular fa-eye"></i> Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="modal-other-{{ item.id }}" class="fixed inset-0 bg-gray-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+                            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fade-in-up">
+                                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                    <h3 class="font-bold text-gray-800">Item Details</h3>
+                                    <button onclick="closeModal('modal-other-{{ item.id }}')" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+                                </div>
+                                <div class="p-6">
+                                    {% if item.item_image %}
+                                        <div class="rounded-xl overflow-hidden mb-4 bg-gray-100 border border-gray-200">
+                                            <img src="{{ item.item_image.url }}" class="w-full h-56 object-contain">
+                                        </div>
+                                    {% endif %}
+                                    <div class="space-y-3 text-sm">
+                                        <div><span class="block text-xs font-bold text-[#9c9c9c] uppercase">Description</span><p class="text-gray-800">{{ item.description }}</p></div>
+                                        <div><span class="block text-xs font-bold text-[#9c9c9c] uppercase">Location</span><p class="text-gray-800">{{ item.location_found }}</p></div>
+                                        <div><span class="block text-xs font-bold text-[#9c9c9c] uppercase">Date</span><p class="text-gray-800">{{ item.date_found }}</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-sm text-gray-400 italic px-2">No other items found in this category.</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+</script>
+{% endblock %}

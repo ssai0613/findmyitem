@@ -1,0 +1,151 @@
+{% extends 'base_dashboard.html' %}
+
+{% block content %}
+<div class="space-y-8">
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-300 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-[#ffa700] opacity-5 rounded-bl-full -mr-4 -mt-4 transition group-hover:scale-110"></div>
+            <div class="flex justify-between items-start relative z-10">
+                <div>
+                    <p class="text-xs font-bold text-[#9c9c9c] uppercase tracking-wider">Inventory</p>
+                    <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ stats.items_in_inventory }}</h3>
+                </div>
+                <div class="w-10 h-10 bg-orange-50 text-[#ffa700] rounded-xl flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-300 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-blue-500 opacity-5 rounded-bl-full -mr-4 -mt-4 transition group-hover:scale-110"></div>
+            <div class="flex justify-between items-start relative z-10">
+                <div>
+                    <p class="text-xs font-bold text-[#9c9c9c] uppercase tracking-wider">Lost Tickets</p>
+                    <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ stats.lost_tickets }}</h3>
+                </div>
+                <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-ticket"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-300 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-red-500 opacity-5 rounded-bl-full -mr-4 -mt-4 transition group-hover:scale-110"></div>
+            <div class="flex justify-between items-start relative z-10">
+                <div>
+                    <p class="text-xs font-bold text-[#9c9c9c] uppercase tracking-wider">Pending Claims</p>
+                    <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ stats.pending_claims }}</h3>
+                </div>
+                <div class="w-10 h-10 bg-red-50 text-red-500 rounded-xl flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-300 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500 opacity-5 rounded-bl-full -mr-4 -mt-4 transition group-hover:scale-110"></div>
+            <div class="flex justify-between items-start relative z-10">
+                <div>
+                    <p class="text-xs font-bold text-[#9c9c9c] uppercase tracking-wider">Hand-ins</p>
+                    <h3 class="text-3xl font-bold text-gray-800 mt-1">{{ stats.hand_ins }}</h3>
+                </div>
+                <div class="w-10 h-10 bg-purple-50 text-purple-500 rounded-xl flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-hand-holding"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+            <div class="px-6 py-5 border-b border-gray-50 flex justify-between items-center">
+                <h3 class="font-bold text-gray-800">Recent Lost Tickets</h3>
+                <a href="{% url 'manage_lost_tickets' %}" class="text-xs font-bold text-[#ffa700] hover:text-orange-600 transition">View All</a>
+            </div>
+            <div class="p-2 flex-grow">
+                {% if recent_tickets %}
+                    <ul class="space-y-1">
+                        {% for ticket in recent_tickets %}
+                        <li class="p-3 hover:bg-orange-50/50 rounded-xl transition flex justify-between items-center group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xs">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-gray-800 text-sm">{{ ticket.item_name }}</p>
+                                    <p class="text-[10px] text-[#9c9c9c] uppercase tracking-wide">{{ ticket.owner.username }}</p>
+                                </div>
+                            </div>
+                            <a href="{% url 'ticket_match' ticket.id %}" class="opacity-0 group-hover:opacity-100 bg-[#ffa700] text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg shadow-orange-200 hover:bg-orange-600 transition transform scale-90 group-hover:scale-100">
+                                Match
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-center py-10">
+                        <p class="text-[#9c9c9c] text-sm">No active tickets.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+            <div class="px-6 py-5 border-b border-gray-50 flex justify-between items-center">
+                <h3 class="font-bold text-gray-800">Incoming Hand-ins</h3>
+                <a href="{% url 'manage_handins' %}" class="text-xs font-bold text-[#ffa700] hover:text-orange-600 transition">View All</a>
+            </div>
+            <div class="p-2 flex-grow">
+                {% if pending_hand_ins %}
+                    <ul class="space-y-1">
+                        {% for report in pending_hand_ins %}
+                        <li class="p-3 hover:bg-purple-50/50 rounded-xl transition group">
+                            <div class="flex justify-between items-start mb-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono text-xs font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded">{{ report.reference_code }}</span>
+                                    <span class="text-xs text-[#9c9c9c]">{{ report.date_reported|date:"M d" }}</span>
+                                </div>
+                            </div>
+                            <p class="text-sm font-medium text-gray-700 pl-1">{{ report.item_name }}</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-center py-10">
+                        <p class="text-[#9c9c9c] text-sm">No pending reports.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if pending_claims_list %}
+    <div class="bg-red-50 rounded-2xl border border-red-100 p-1">
+        <div class="px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-red-100 text-red-500 rounded-full flex items-center justify-center animate-pulse">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">Action Required: Claims</h3>
+                    <p class="text-xs text-red-500">You have pending claims waiting for verification.</p>
+                </div>
+            </div>
+            <a href="{% url 'manage_claims' %}" class="bg-white text-gray-800 px-4 py-2 rounded-lg text-xs font-bold shadow-sm hover:bg-gray-50 transition">Review Now</a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if recent_logs %}
+    <div class="bg-gray-900 rounded-2xl shadow-lg overflow-hidden text-gray-400 text-xs">
+        <div class="px-6 py-3 bg-black/20 border-b border-white/5 font-bold uppercase tracking-wider">System Logs</div>
+        <div class="p-4 space-y-2 max-h-48 overflow-y-auto font-mono">
+            <p>Logs rendered here...</p>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

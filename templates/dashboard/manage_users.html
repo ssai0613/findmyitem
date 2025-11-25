@@ -1,0 +1,71 @@
+{% extends 'base_dashboard.html' %}
+{% block content %}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[calc(100vh-140px)]">
+    
+    <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-gray-800">Manage {{ role|title }}s</h2>
+            <p class="text-xs text-[#9c9c9c] mt-1">Total users: {{ users.count }}</p>
+        </div>
+        
+        <div class="flex gap-3">
+             <form method="get" class="flex gap-2 relative">
+                 <input type="hidden" name="role" value="{{ role }}">
+                 <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                 <input type="text" name="q" placeholder="Search user..." value="{{ request.GET.q }}" 
+                    class="w-56 bg-gray-50 border border-gray-200 rounded-xl py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-[#ffa700]">
+             </form>
+             {% if role == 'STAFF' %}
+             <a href="{% url 'add_staff' %}" class="bg-[#ffa700] text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-orange-200 hover:bg-orange-600 transition flex items-center gap-2">
+                <i class="fa-solid fa-user-plus"></i> Add Staff
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="flex-grow overflow-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead class="bg-gray-50 text-[#9c9c9c] font-semibold uppercase text-xs tracking-wider sticky top-0 z-10">
+                <tr>
+                    <th class="px-6 py-4">User</th>
+                    {% if role == 'STUDENT' %} <th class="px-6 py-4">ID Number</th> {% endif %}
+                    <th class="px-6 py-4">Contact</th>
+                    <th class="px-6 py-4">Date Joined</th>
+                    {% if role == 'STAFF' %} <th class="px-6 py-4 text-center">Status</th> <th class="px-6 py-4 text-right">Edit</th> {% endif %}
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for u in users %}
+                <tr class="hover:bg-orange-50/30 transition duration-150">
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-gray-800">{{ u.username }}</div>
+                        <div class="text-xs text-[#9c9c9c]">{{ u.first_name }} {{ u.last_name }}</div>
+                    </td>
+                    {% if role == 'STUDENT' %}
+                    <td class="px-6 py-4 font-mono text-[#ffa700] font-bold">{{ u.student_id|default:"-" }}</td>
+                    {% endif %}
+                    <td class="px-6 py-4 text-gray-600">{{ u.email }}</td>
+                    <td class="p-6 py-4 text-gray-500">{{ u.date_joined|date:"M d, Y" }}</td>
+                    {% if role == 'STAFF' %}
+                    <td class="px-6 py-4 text-center">
+                        {% if u.is_active %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Active</span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <a href="{% url 'edit_user' u.id %}" class="w-8 h-8 rounded-lg bg-gray-100 text-gray-400 flex items-center justify-center hover:bg-[#ffa700] hover:text-white transition inline-flex">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="px-6 py-12 text-center text-gray-400 italic">No users found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

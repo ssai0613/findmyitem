@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTU Main - Lost & Found</title>
+    <link rel="icon" type="image/png" href="{% static 'images/ctu logo.png' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #9c9c9c; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ffa700; }
+
+        /* Active Nav Link State */
+        .nav-active {
+            color: #ffa700 !important;
+        }
+        .nav-active::after {
+            width: 100% !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 flex flex-col min-h-screen text-gray-800 antialiased selection:bg-[#ffa700] selection:text-white">
+
+    <nav class="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 transition-all duration-300">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                
+                <a href="{% url 'home' %}" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 bg-transparent flex items-center justify-center group-hover:scale-105 transition duration-300">
+                        <img src="{% static 'images/ctu logo.png' %}" 
+                            alt="School Logo" 
+                            class="d-inline-block align-middle"
+                            style="height: 40px; width: auto;">
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-gray-900 text-lg leading-tight tracking-tight">Cebu Technological University</span>
+                        <span class="text-[10px] text-[#9c9c9c] font-bold uppercase tracking-[0.15em]"><span class="text-[#ffa700]">Main Campus</span> - Lost & Found System</span>
+                    </div>
+                </a>
+
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="{% url 'home' %}#top" id="nav-top" class="nav-link text-sm font-medium text-gray-500 hover:text-[#ffa700] transition relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-[#ffa700] hover:after:w-full after:transition-all">Home</a>
+                    <a href="{% url 'home' %}#found-items" id="nav-found-items" class="nav-link text-sm font-medium text-gray-500 hover:text-[#ffa700] transition relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-[#ffa700] hover:after:w-full after:transition-all">Browse Items</a>
+                    <a href="{% url 'home' %}#about" id="nav-about" class="nav-link text-sm font-medium text-gray-500 hover:text-[#ffa700] transition relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-0.5 after:bg-[#ffa700] hover:after:w-full after:transition-all">About</a>
+                    
+                    <div class="h-6 w-px bg-gray-200 mx-2"></div>
+
+                    {% if user.is_authenticated %}
+                        <div class="relative">
+                            <button onclick="toggleUserMenu()" id="user-menu-btn" class="flex items-center gap-2 text-gray-700 font-semibold hover:text-[#ffa700] transition focus:outline-none">
+                                <span>{{ user.username }}</span>
+                                <i class="fa-solid fa-chevron-down text-xs text-[#9c9c9c] transition-transform duration-200" id="user-menu-icon"></i>
+                            </button>
+                            
+                            <div id="user-menu-dropdown" class="absolute right-0 mt-4 w-56 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] hidden border border-gray-100 overflow-hidden transform origin-top-right transition-all p-2 z-50">
+                                <div class="px-4 py-2 border-b border-gray-50 mb-1">
+                                    <p class="text-xs text-gray-400 uppercase">Signed in as</p>
+                                    <p class="text-sm font-bold text-gray-800 truncate">{{ user.email }}</p>
+                                </div>
+                                <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-gray-600 hover:text-[#ffa700] transition">
+                                    <i class="fa-solid fa-gauge-high w-5"></i> Dashboard
+                                </a>
+                                <form action="{% url 'logout' %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-red-500 transition text-left">
+                                        <i class="fa-solid fa-right-from-bracket w-5"></i> Log Out
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-sm font-semibold text-gray-600 hover:text-[#ffa700] transition">Log In</a>
+                        <a href="{% url 'signup' %}" class="bg-[#ffa700] text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-orange-200 hover:shadow-orange-300 hover:-translate-y-0.5 transition duration-300">Get Started</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow relative">
+        {% if messages %}
+            <div class="container mx-auto px-6 mt-6 absolute top-0 left-0 right-0 z-40">
+                {% for message in messages %}
+                    <div class="p-4 rounded-xl shadow-lg border-l-4 backdrop-blur-sm flex items-center gap-3 animate-fade-in-down mb-3
+                        {% if message.tags == 'success' %}bg-white/90 border-green-500 text-green-700
+                        {% elif message.tags == 'error' %}bg-white/90 border-red-500 text-red-700
+                        {% else %}bg-white/90 border-blue-500 text-blue-700{% endif %}">
+                        <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+                        <span class="font-medium">{{ message }}</span>
+                        <button onclick="this.parentElement.remove()" class="ml-auto text-gray-400 hover:text-gray-600">&times;</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-white border-t border-gray-100 pt-16 pb-8">
+        <div class="container mx-auto px-6">
+            
+            <div class="flex flex-col md:flex-row justify-between items-center mb-10">
+                <div class="flex items-center gap-3 mb-6 md:mb-0">
+                    <div class="flex items-center justify-center text-white">
+                        <img src="{% static 'images/ctu logo.png' %}" class="d-inline-block align-middle" style="height: 40px; width: auto;">
+                    </div>
+                    <span class="font-bold text-gray-800 tracking-tight">CTU - Main Campus</span>
+                </div>
+                <div class="flex gap-6 text-[#9c9c9c]">
+                    <a href="#" class="hover:text-[#ffa700] transition"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" class="hover:text-[#ffa700] transition"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" class="hover:text-[#ffa700] transition"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+            </div>
+
+            <div class="border-t border-b border-gray-100 py-8 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    <div class="md:pr-10">
+                        <h3 class="text-gray-800 font-bold mb-3 text-sm uppercase tracking-wider">Project Status</h3>
+                        <p class="text-sm text-gray-500 leading-relaxed">
+                            <span class="text-[#ffa700] font-semibold">Note:</span> 
+                            This system is a <strong>Project Prototype</strong> developed for academic purposes. 
+                            It is intended to demonstrate the functionality of a Lost & Found Management System.
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-gray-800 font-bold mb-3 text-sm uppercase tracking-wider">Development Team</h3>
+                        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500">
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 bg-[#ffa700] rounded-full"></span> Alquizar, Randel
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 bg-[#ffa700] rounded-full"></span> Lingo, Cyrus Vince
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 bg-[#ffa700] rounded-full"></span> Pestano, Jun Joseph
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 bg-[#ffa700] rounded-full"></span> Samulde, Lhean Grace
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center md:text-left flex flex-col md:flex-row justify-between text-sm text-[#9c9c9c]">
+                <p>&copy; 2025 Lost & Found System. All rights reserved.</p>
+                <div class="flex gap-6 justify-center md:justify-end mt-4 md:mt-0">
+                    <a href="#" class="hover:text-gray-600 transition">Privacy Policy</a>
+                    <a href="#" class="hover:text-gray-600 transition">Terms of Service</a>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+
+    <script>
+        // --- 1. USER MENU TOGGLE ---
+        function toggleUserMenu() {
+            const menu = document.getElementById('user-menu-dropdown');
+            const icon = document.getElementById('user-menu-icon');
+            
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                menu.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const btn = document.getElementById('user-menu-btn');
+            const menu = document.getElementById('user-menu-dropdown');
+            const icon = document.getElementById('user-menu-icon');
+            
+            if (btn && menu && !btn.contains(event.target) && !menu.contains(event.target)) {
+                menu.classList.add('hidden');
+                if(icon) icon.style.transform = 'rotate(0deg)';
+            }
+        });
+
+        // --- 2. SCROLL SPY (Active Nav Link) ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            function changeLinkState() {
+                let index = sections.length;
+
+                // Default to top if near top
+                if (window.scrollY < 100) {
+                    navLinks.forEach((link) => link.classList.remove('nav-active'));
+                    const topLink = document.getElementById('nav-top');
+                    if(topLink) topLink.classList.add('nav-active');
+                    return;
+                }
+
+                while(--index && window.scrollY + 150 < sections[index].offsetTop) {}
+                
+                navLinks.forEach((link) => link.classList.remove('nav-active'));
+                
+                if (sections[index]) {
+                    const id = sections[index].id;
+                    // Map section ID to Nav ID
+                    const activeLink = document.getElementById('nav-' + id);
+                    if (activeLink) {
+                        activeLink.classList.add('nav-active');
+                    }
+                }
+            }
+
+            // Listen to scroll
+            window.addEventListener('scroll', changeLinkState);
+            // Run once on load
+            changeLinkState();
+        });
+    </script>
+
+</body>
+</html>

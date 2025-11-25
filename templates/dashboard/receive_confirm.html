@@ -1,0 +1,31 @@
+{% extends 'base_dashboard.html' %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-100px)]">
+    <div class="max-w-lg w-full bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Receive Item?</h2>
+            <p class="text-sm text-gray-500">This will convert report <span class="font-mono font-bold text-purple-600">{{ report.reference_code }}</span> into official inventory.</p>
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-6 text-sm">
+            <p><span class="font-bold text-gray-500 uppercase text-xs">Item:</span> {{ report.item_name }}</p>
+            <p><span class="font-bold text-gray-500 uppercase text-xs">Finder:</span> {{ report.finder_name|default:"Anonymous" }}</p>
+            <p><span class="font-bold text-gray-500 uppercase text-xs">Description:</span> {{ report.description }}</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 bg-purple-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-purple-700 transition">
+                    Confirm Receipt
+                </button>
+                <a href="{% url 'manage_handins' %}" class="px-6 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50 transition">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

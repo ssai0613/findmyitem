@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center bg-slate-50 px-4">
+    <div class="max-w-md w-full bg-white p-10 rounded-3xl shadow-2xl text-center border border-gray-100 relative overflow-hidden">
+        
+        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/confetti.png')] opacity-50"></div>
+
+        <div class="relative z-10">
+            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600 text-5xl shadow-inner animate-bounce">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Report Filed!</h2>
+            <p class="text-[#9c9c9c] mb-8">Thank you for being a good citizen.</p>
+            
+            <div class="bg-slate-50 p-8 rounded-2xl border border-dashed border-gray-300 mb-8 relative group hover:border-[#ffa700] transition">
+                <p class="text-xs text-gray-400 uppercase font-bold tracking-widest mb-2">Reference Code</p>
+                <p class="text-5xl font-mono font-bold text-[#ffa700] tracking-wider group-hover:scale-110 transition transform">{{ report.reference_code }}</p>
+                
+                <div class="absolute -top-3 -right-3 bg-[#ffa700] text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg">
+                    PENDING RECEIPT
+                </div>
+            </div>
+
+            <div class="bg-orange-50 p-4 rounded-xl mb-8">
+                <p class="text-sm text-orange-800">
+                    <i class="fa-solid fa-circle-info mr-1"></i>
+                    Please drop the item at <strong class="text-gray-900">Room 101 (Lost & Found)</strong>.
+                </p>
+            </div>
+            
+            <a href="{% url 'home' %}" class="block w-full bg-gray-900 text-white py-4 rounded-xl font-bold hover:bg-black transition shadow-lg">Return to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

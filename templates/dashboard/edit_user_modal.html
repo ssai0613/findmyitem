@@ -1,0 +1,55 @@
+{% extends 'base_dashboard.html' %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-100px)]">
+    <div class="max-w-lg w-full bg-white rounded-2xl shadow-xl border border-gray-100 p-8 relative">
+        
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl text-[#9c9c9c]">
+                <i class="fa-solid fa-user-pen"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Edit User</h2>
+            <p class="text-sm text-[#9c9c9c]">Updating profile for <span class="font-mono text-[#ffa700]">{{ target_user.username }}</span></p>
+        </div>
+        
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">First Name</label>
+                    <input type="text" name="first_name" value="{{ target_user.first_name }}" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:border-[#ffa700] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Last Name</label>
+                    <input type="text" name="last_name" value="{{ target_user.last_name }}" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:border-[#ffa700] outline-none">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
+                <input type="email" name="email" value="{{ target_user.email }}" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:border-[#ffa700] outline-none">
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-center justify-between">
+                <label for="active_check" class="text-sm font-bold text-gray-700">Account Active Status</label>
+                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="is_active" id="active_check" {% if target_user.is_active %}checked{% endif %} class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300"/>
+                    <label for="active_check" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                </div>
+            </div>
+
+            <div class="pt-4 flex gap-3">
+                <button type="submit" class="flex-1 bg-[#ffa700] text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition shadow-lg shadow-orange-200">Save Changes</button>
+                <a href="javascript:history.back()" class="px-6 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50 transition">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Custom Toggle Switch CSS */
+    .toggle-checkbox:checked { right: 0; border-color: #ffa700; }
+    .toggle-checkbox:checked + .toggle-label { background-color: #ffa700; }
+    .toggle-checkbox { right: 24px; border-color: #e5e7eb; }
+</style>
+{% endblock %}

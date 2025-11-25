@@ -1,0 +1,61 @@
+{% extends 'base_dashboard.html' %}
+{% block content %}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[calc(100vh-140px)]">
+    
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-gray-800">Lost Item Tickets</h2>
+            <p class="text-xs text-[#9c9c9c] mt-1">Student reports.</p>
+        </div>
+        <form method="get" class="relative">
+            <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400"></i>
+            <input type="text" name="q" placeholder="Search ticket..." value="{{ request.GET.q }}" 
+                class="w-64 bg-gray-50 border border-gray-200 rounded-xl py-2 pl-9 pr-3 text-sm focus:outline-none focus:border-[#ffa700]">
+        </form>
+    </div>
+
+    <div class="flex-grow overflow-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead class="bg-gray-50 text-[#9c9c9c] font-semibold uppercase text-xs tracking-wider sticky top-0 z-10">
+                <tr>
+                    <th class="px-6 py-4">Item Name</th>
+                    <th class="px-6 py-4">Owner</th>
+                    <th class="px-6 py-4">Date Lost</th>
+                    <th class="px-6 py-4 text-center">Status</th>
+                    <th class="px-6 py-4 text-center">AI Match</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for ticket in tickets %}
+                <tr class="hover:bg-orange-50/30 transition duration-150">
+                    <td class="px-6 py-4 font-bold text-gray-800">{{ ticket.item_name }}</td>
+                    <td class="px-6 py-4 text-gray-600">{{ ticket.owner.username }}</td>
+                    <td class="px-6 py-4 text-gray-500">{{ ticket.date_lost }}</td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                            {% if ticket.status == 'SEARCHING' %}bg-yellow-100 text-yellow-800
+                            {% elif ticket.status == 'CLOSED' %}bg-green-100 text-green-800
+                            {% else %}bg-blue-100 text-blue-800{% endif %}">
+                            {{ ticket.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        {% if ticket.status == 'CLOSED' %}
+                            <button disabled class="inline-flex items-center gap-2 bg-gray-100 text-gray-400 px-3 py-1.5 rounded-lg text-xs font-bold cursor-not-allowed">
+                                <i class="fa-solid fa-check"></i> Resolved
+                            </button>
+                        {% else %}
+                            <a href="{% url 'ticket_match' ticket.id %}" class="inline-flex items-center gap-2 bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-[#ffa700] hover:text-white transition group">
+                                <i class="fa-solid fa-wand-magic-sparkles text-[#ffa700] group-hover:text-white"></i> Run
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="px-6 py-12 text-center text-gray-400 italic">No tickets found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-slate-50 min-h-screen py-12 px-4">
+    <div class="container mx-auto max-w-6xl">
+        
+        <a href="{% url 'dashboard' %}" class="inline-flex items-center text-gray-500 hover:text-[#ffa700] mb-8 transition font-medium">
+            <i class="fa-solid fa-arrow-left-long mr-2"></i> Cancel & Return
+        </a>
+
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col lg:flex-row">
+            
+            <div class="w-full lg:w-2/5 bg-gray-900 text-white p-10 flex flex-col relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-[#ffa700] rounded-full mix-blend-overlay filter blur-[80px] opacity-20"></div>
+                
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="p-2 bg-white/10 rounded-lg"><i class="fa-solid fa-shield-halved text-[#ffa700]"></i></div>
+                        <span class="text-sm font-bold tracking-widest uppercase text-gray-400">Verification</span>
+                    </div>
+
+                    <div class="mb-8 rounded-2xl overflow-hidden bg-black/20 border border-white/10 shadow-lg">
+                        {% if item.item_image %}
+                            <img src="{{ item.item_image.url }}" class="w-full h-64 object-cover opacity-90 hover:opacity-100 transition cursor-zoom-in" onclick="window.open(this.src)">
+                        {% else %}
+                            <div class="h-64 flex items-center justify-center text-gray-500">No Image</div>
+                        {% endif %}
+                    </div>
+
+                    <h2 class="text-3xl font-bold mb-2 leading-tight">{{ item.item_name }}</h2>
+                    <p class="text-[#ffa700] font-medium mb-6">{{ item.get_category_display }}</p>
+                    
+                    <div class="space-y-4 text-sm text-gray-300">
+                        <div class="flex gap-4 border-t border-white/10 pt-4">
+                            <span class="w-20 font-bold text-gray-500">Found</span>
+                            <span>{{ item.date_found }}</span>
+                        </div>
+                        <div class="flex gap-4 border-t border-white/10 pt-4">
+                            <span class="w-20 font-bold text-gray-500">Location</span>
+                            <span>{{ item.location_found }}</span>
+                        </div>
+                        <div class="flex gap-4 border-t border-white/10 pt-4">
+                            <span class="w-20 font-bold text-gray-500">Color</span>
+                            <span>{{ item.color }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-3/5 p-10 lg:p-16">
+                <div class="mb-10">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-4">Claim Ownership</h1>
+                    <p class="text-[#9c9c9c] leading-relaxed">
+                        To prevent fraud, please provide details that only the true owner would know. 
+                        <span class="text-red-500 font-medium">False claims may result in disciplinary action.</span>
+                    </p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" class="space-y-8">
+                    {% csrf_token %}
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-800 mb-2">
+                            Proof Description <span class="text-[#ffa700]">*</span>
+                        </label>
+                        <textarea name="proof_of_ownership" rows="6" class="w-full bg-gray-50 border border-gray-200 rounded-2xl p-5 focus:outline-none focus:border-[#ffa700] focus:ring-2 focus:ring-[#ffa700]/20 transition resize-none text-gray-700 leading-relaxed" placeholder="E.g., 'There is a small scratch on the bottom left corner, and the wallpaper is a picture of a golden retriever.'"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-800 mb-2">Photo Evidence (Optional)</label>
+                        <div class="relative w-full h-40 border-2 border-dashed border-gray-300 rounded-2xl hover:bg-orange-50 hover:border-[#ffa700] transition group flex flex-col items-center justify-center cursor-pointer bg-gray-50/50">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-300 group-hover:text-[#ffa700] transition mb-2"></i>
+                            <p class="text-sm font-medium text-gray-400 group-hover:text-orange-700">Click or Drag to Upload</p>
+                            <input type="file" name="proof_image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#ffa700] text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-orange-200 hover:bg-orange-600 hover:shadow-orange-300 transition transform hover:-translate-y-0.5">
+                        Submit Verification
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

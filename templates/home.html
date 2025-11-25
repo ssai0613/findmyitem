@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section id="top" class="relative min-h-[700px] flex items-center justify-center overflow-hidden bg-slate-900">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black"></div>
+    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-[#ffa700] rounded-full mix-blend-screen filter blur-[128px] opacity-20 animate-pulse"></div>
+
+    <div class="relative z-10 text-center px-4 max-w-5xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[#ffa700] text-sm font-semibold mb-8 backdrop-blur-sm">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ffa700] opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-[#ffa700]"></span>
+            </span>
+            Unofficial University System
+        </div>
+        
+        <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
+            FIND MY ITEM<br>
+            <span class="text-4xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-[#ffa700] to-orange-100">Lost & Found System</span>
+        </h1>
+        
+        <p class="text-lg text-[#9c9c9c] mb-10 max-w-2xl mx-auto leading-relaxed">
+            The centralized platform for reporting and reclaiming lost belongings at Cebu Technological University - Main Campus. Secure, fast, and reliable.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{% url 'submit_ticket' %}" class="bg-[#ffa700] text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-[0_20px_40px_-15px_rgba(255,167,0,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(255,167,0,0.6)] hover:-translate-y-1 transition duration-300 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-file-circle-plus"></i> Report Lost Item
+            </a>
+            <a href="{% url 'hand_in' %}" class="bg-white/10 text-white border border-white/10 px-8 py-4 rounded-xl font-semibold text-lg backdrop-blur-sm hover:bg-white/20 transition duration-300 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-hand-holding-heart"></i> I Found Something
+            </a>
+        </div>
+    </div>
+</section>
+
+<section id="found-items" class="py-24 bg-white relative">
+    <div class="container mx-auto px-6">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+            <div>
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Recent Findings</h2>
+                <div class="h-1 w-20 bg-[#ffa700] rounded-full"></div>
+                <p class="text-[#9c9c9c] mt-4 max-w-md">Items turned into the Lost & Found office in the last 30 days. Click to view details.</p>
+            </div>
+            <a href="{% url 'item_gallery' %}" class="text-gray-500 font-semibold hover:text-[#ffa700] transition flex items-center gap-2">
+                View All Archive <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+        </div>
+
+        {% if items %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {% for item in items %}
+                <div class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition duration-500 overflow-hidden flex flex-col h-full">
+                    
+                    <div class="relative h-64 overflow-hidden bg-gray-50">
+                        {% if item.item_image %}
+                            <img src="{{ item.item_image.url }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700 ease-out">
+                        {% else %}
+                            <div class="flex items-center justify-center h-full text-[#9c9c9c]">
+                                <i class="fa-regular fa-image text-4xl opacity-30"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="absolute top-4 left-4">
+                            <span class="bg-white/90 backdrop-blur-md text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+                                {{ item.get_category_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="font-bold text-gray-900 text-lg truncate pr-2">{{ item.item_name }}</h3>
+                        </div>
+                        
+                        <div class="space-y-2 mb-6">
+                            <div class="flex items-center text-sm text-[#9c9c9c]">
+                                <i class="fa-solid fa-location-dot w-5 text-red-500"></i>
+                                <span class="truncate">{{ item.location_found }}</span>
+                            </div>
+                            <div class="flex items-center text-sm text-[#9c9c9c]">
+                                <i class="fa-regular fa-clock w-5 text-blue-500"></i>
+                                <span>{{ item.date_found|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'submit_claim' item.id %}" class="mt-auto w-full py-3 rounded-xl bg-[#ffa700] text-white font-bold text-center shadow-lg shadow-orange-200 hover:bg-orange-600 hover:shadow-orange-300 transition duration-300 transform hover:-translate-y-0.5">
+                            Claim Item
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-gray-50 rounded-3xl p-12 text-center border border-dashed border-gray-200">
+                <i class="fa-solid fa-box-open text-6xl text-[#9c9c9c] mb-4 opacity-50"></i>
+                <h3 class="text-xl font-semibold text-gray-900">No items found recently.</h3>
+                <p class="text-[#9c9c9c]">The inventory is currently empty.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section id="about" class="py-24 bg-slate-50 border-t border-gray-200">
+    <div class="container mx-auto px-6">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <p class="text-[#9c9c9c]">We've streamlined the process to make recovering your items as simple as possible.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:-translate-y-2 transition duration-300">
+                <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 text-2xl mb-6">
+                    <i class="fa-solid fa-file-pen"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">1. Report</h3>
+                <p class="text-[#9c9c9c] leading-relaxed">
+                    Lost something? Submit a detailed ticket. Found something? Hand it in and log it.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:-translate-y-2 transition duration-300">
+                <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-[#ffa700] text-2xl mb-6">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">2. Match</h3>
+                <p class="text-[#9c9c9c] leading-relaxed">
+                    Our system uses Trigram search algorithms to automatically pair lost tickets with found items.
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 hover:-translate-y-2 transition duration-300">
+                <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 text-2xl mb-6">
+                    <i class="fa-solid fa-handshake-simple"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">3. Reclaim</h3>
+                <p class="text-[#9c9c9c] leading-relaxed">
+                    Verify your ownership through our secure claim portal and pick up your item at the office.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

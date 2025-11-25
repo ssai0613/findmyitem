@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTU Main - Lost & Found</title>
+    <link rel="icon" type="image/png" href="{% static 'images/ctu_logo.png' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ffa700; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex h-screen overflow-hidden antialiased">
+
+    <aside class="w-72 bg-[#1a1a1a] flex flex-col shadow-2xl z-20 relative">
+        
+        <div class="h-20 flex items-center px-8 border-b border-gray-800">
+            <img src="{% static 'images/ctu logo.png' %}" class="d-inline-block align-middle" style="height: 40px; width: auto; margin-right: 10px;">
+            <div>
+                <span class="block text-white font-bold tracking-wide">CTU - MAIN CAMPUS</span>
+                <span class="block text-[10px] text-[#9c9c9c] uppercase tracking-widest">Lost & Found System</span>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <div class="bg-gray-800/50 rounded-xl p-4 flex items-center gap-4 border border-gray-700">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#ffa700] to-orange-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                    {{ user.username|first|upper }}
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-white font-semibold text-sm truncate">{{ user.first_name }}</p>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                        <p class="text-[10px] text-[#9c9c9c] uppercase font-bold">{{ user.role }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-grow px-4 pb-4 space-y-1 overflow-y-auto">
+            
+            <a href="{% url 'staff_dashboard' %}" class="group flex items-center gap-3 px-4 py-3.5 rounded-xl transition duration-200 
+               {% if 'staff-dashboard' in request.path %}bg-[#ffa700] text-white shadow-lg shadow-orange-900/20{% else %}text-[#9c9c9c] hover:bg-gray-800 hover:text-white{% endif %}">
+                <i class="fa-solid fa-gauge-high w-5 text-center transition group-hover:scale-110"></i>
+                <span class="font-medium text-sm">Dashboard</span>
+            </a>
+
+            {% if user.role == 'ADMIN' %}
+                <div class="mt-8 mb-2 px-4 flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">User Management</span>
+                    <div class="h-px bg-gray-800 flex-grow"></div>
+                </div>
+                
+                <a href="{% url 'manage_users' %}?role=STAFF" class="group flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+                   {% if 'role=STAFF' in request.get_full_path %}bg-gray-800 text-[#ffa700] border-l-4 border-[#ffa700]{% else %}text-[#9c9c9c] hover:bg-gray-800 hover:text-white{% endif %}">
+                    <i class="fa-solid fa-user-tie w-5 text-center"></i>
+                    <span class="font-medium text-sm">Staff Users</span>
+                </a>
+                <a href="{% url 'manage_users' %}?role=STUDENT" class="group flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+                   {% if 'role=STUDENT' in request.get_full_path %}bg-gray-800 text-[#ffa700] border-l-4 border-[#ffa700]{% else %}text-[#9c9c9c] hover:bg-gray-800 hover:text-white{% endif %}">
+                    <i class="fa-solid fa-users w-5 text-center"></i>
+                    <span class="font-medium text-sm">Students</span>
+                </a>
+            {% endif %}
+
+            <div class="mt-8 mb-2 px-4 flex items-center gap-2">
+                <span class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Inventory</span>
+                <div class="h-px bg-gray-800 flex-grow"></div>
+            </div>
+
+            <a href="{% url 'manage_found_items' %}" class="group flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+               {% if 'items' in request.path %}bg-gray-800 text-[#ffa700] border-l-4 border-[#ffa700]{% else %}text-[#9c9c9c] hover:bg-gray-800 hover:text-white{% endif %}">
+                <i class="fa-solid fa-box-open w-5 text-center"></i>
+                <span class="font-medium text-sm">Found Items</span>
+            </a>
+
+            <a href="{% url 'manage_lost_tickets' %}" class="group flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+               {% if 'tickets' in request.path %}bg-gray-800 text-[#ffa700] border-l-4 border-[#ffa700]{% else %}text-[#9c9c9c] hover:bg-gray-800 hover:text-white{% endif %}">
+                <i class="fa-solid fa-ticket w-5 text-center"></i>
+                <span class="font-medium text-sm">Lost Tickets</span>
+            </a>
+            
+            <a href="{% url 'manage_claims' %}" class="group flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+               {% if 'claims' in request.path %}bg-gray-800 text-[#ffa700] border-l-4 border-[#ffa700]{% else %}text-[#9c9c9c] hover:bg-gray-800 hover:text-white{% endif %}">
+                <i class="fa-solid fa-clipboard-check w-5 text-center"></i>
+                <span class="font-medium text-sm">Claim Requests</span>
+            </a>
+            
+            <a href="{% url 'manage_handins' %}" class="group flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+               {% if 'handins' in request.path %}bg-gray-800 text-[#ffa700] border-l-4 border-[#ffa700]{% else %}text-[#9c9c9c] hover:bg-gray-800 hover:text-white{% endif %}">
+                <i class="fa-solid fa-hand-holding w-5 text-center"></i>
+                <span class="font-medium text-sm">Hand-ins</span>
+            </a>
+
+            {% if user.role == 'ADMIN' %}
+                <div class="mt-8 mb-2 px-4 flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Logs</span>
+                    <div class="h-px bg-gray-800 flex-grow"></div>
+                </div>
+                <a href="{% url 'view_audit_logs' %}" class="group flex items-center gap-3 px-4 py-3 rounded-xl transition duration-200 
+                   {% if 'audit' in request.path %}bg-gray-800 text-[#ffa700] border-l-4 border-[#ffa700]{% else %}text-[#9c9c9c] hover:bg-gray-800 hover:text-white{% endif %}">
+                    <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+                    <span class="font-medium text-sm">Audit Trail</span>
+                </a>
+            {% endif %}
+        </nav>
+
+        <div class="p-4 bg-gray-900 border-t border-gray-800">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-xl transition duration-200 font-medium text-sm">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50">
+        <header class="h-20 bg-white flex items-center justify-between px-8 border-b border-gray-100 sticky top-0 z-10">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800 tracking-tight">
+                    {% if user.role == 'ADMIN' %}Administrator{% else %}Staff{% endif %} Console
+                </h2>
+                <p class="text-xs text-[#9c9c9c]">Welcome back, {{ user.first_name }}</p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <a href="{% url 'home' %}" class="text-sm font-medium text-gray-500 hover:text-[#ffa700] transition flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-orange-50">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit Site
+                </a>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-x-hidden overflow-y-auto p-8 scroll-smooth">
+            <div class="max-w-7xl mx-auto">
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="mb-6 p-4 rounded-xl shadow-sm border-l-4 flex items-center gap-3 animate-fade-in
+                        {% if message.tags == 'success' %}bg-white border-green-500 text-green-700
+                        {% else %}bg-white border-red-500 text-red-700{% endif %}">
+                        <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>

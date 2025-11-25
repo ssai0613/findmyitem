@@ -1,0 +1,136 @@
+{% extends 'base_dashboard.html' %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[calc(100vh-140px)]">
+    
+    <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-gray-800">Inventory</h2>
+            <p class="text-xs text-[#9c9c9c] mt-1">Manage found items.</p>
+        </div>
+        
+        <div class="flex gap-3">
+             <form method="get" class="flex gap-2">
+                <input type="text" name="q" placeholder="Search item..." value="{{ request.GET.q }}" 
+                    class="w-48 bg-gray-50 border border-gray-200 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-[#ffa700]">
+                <button type="submit" class="bg-gray-100 text-gray-600 px-3 py-2 rounded-xl text-sm hover:bg-gray-200 transition"><i class="fa-solid fa-filter"></i></button>
+             </form>
+             <button onclick="document.getElementById('add-item-modal').classList.remove('hidden')" class="bg-[#ffa700] text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-orange-200 hover:bg-orange-500 transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> Add Item
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-grow overflow-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead class="bg-gray-50 text-[#9c9c9c] font-semibold uppercase text-xs tracking-wider sticky top-0 z-10">
+                <tr>
+                    <th class="px-6 py-4 text-center">Item Name</th>
+                    <th class="px-6 py-4 text-center">Category</th>
+                    <th class="px-6 py-4 text-center">Status</th>
+                    <th class="px-6 py-4 text-center">Date Found</th>
+                    <th class="px-6 py-4 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50 text-center"> {% for item in items %}
+                <tr class="hover:bg-orange-50/30 transition duration-150">
+                    <td class="px-6 py-4 font-bold text-gray-800">{{ item.item_name }}</td>
+                    <td class="px-6 py-4 text-gray-600">{{ item.get_category_display }}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                            {% if item.current_status == 'AVAILABLE' %}bg-green-100 text-green-700
+                            {% elif item.current_status == 'CLAIMED' %}bg-blue-100 text-blue-700
+                            {% else %}bg-gray-200 text-gray-600{% endif %}">
+                            {{ item.current_status }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">{{ item.date_found }}</td>
+                    <td class="px-6 py-4">
+                        {% if user.role == 'ADMIN' %}
+                        <a href="{% url 'delete_found_item' item.id %}" onclick="return confirm('Delete?')" class="text-gray-400 hover:text-red-500 transition"><i class="fa-solid fa-trash"></i></a>
+                        {% else %}
+                        <span class="text-gray-300">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="px-6 py-12 text-center text-gray-400 italic">No items found matching query.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="add-item-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity"></div>
+
+    <div class="flex min-h-screen items-center justify-center p-4 text-center">
+        <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
+            
+            <div class="bg-gray-50 px-8 py-5 flex justify-between items-center border-b border-gray-100">
+                <h3 class="font-bold text-lg text-gray-800">Add New Found Item</h3>
+                <button onclick="document.getElementById('add-item-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-xl transition">&times;</button>
+            </div>
+            
+            <div class="p-8 max-h-[70vh] overflow-y-auto">
+                <form action="{% url 'add_found_item' %}" method="post" enctype="multipart/form-data" class="space-y-5">
+                    {% csrf_token %}
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Item Name</label>
+                            <input type="text" name="item_name" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:border-[#ffa700] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
+                            <select name="category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:border-[#ffa700] outline-none">
+                                <option value="ELECTRONICS">Electronics</option>
+                                <option value="CLOTHING">Clothing</option>
+                                <option value="IDS">IDs & Cards</option>
+                                <option value="KEYS">Keys</option>
+                                <option value="BOOKS">Books</option>
+                                <option value="BAGS">Bags</option>
+                                <option value="TUMBLERS">Tumblers</option>
+                                <option value="OTHERS">Others</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
+                         <textarea name="description" rows="3" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:border-[#ffa700] outline-none"></textarea>
+                    </div>
+
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Color</label>
+                            <input type="text" name="color" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:border-[#ffa700] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Date Found</label>
+                            <input type="date" name="date_found" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:border-[#ffa700] outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Location</label>
+                        <input type="text" name="location_found" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:border-[#ffa700] outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Image</label>
+                        <input type="file" name="item_image" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2">
+                    </div>
+
+                    <input type="hidden" name="current_status" value="AVAILABLE">
+
+                    <div class="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-2">
+                        <button type="button" onclick="document.getElementById('add-item-modal').classList.add('hidden')" class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50 transition">Cancel</button>
+                        <button type="submit" class="bg-[#ffa700] text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-orange-200 hover:bg-orange-600 transition">Save Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

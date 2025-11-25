@@ -1,0 +1,45 @@
+{% extends 'base_dashboard.html' %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[calc(100vh-100px)]">
+    <div class="max-w-xl w-full bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
+        <div class="px-8 py-6 border-b border-gray-50 bg-gray-50/30">
+            <h2 class="text-xl font-bold text-gray-800">{{ title }}</h2>
+        </div>
+        
+        <div class="p-8">
+            <form method="post" enctype="multipart/form-data" class="space-y-5">
+                {% csrf_token %}
+                {% for field in form %}
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">{{ field.label }}</label>
+                    {% if field.name == 'date_found' or field.name == 'date_lost' %}
+                        <input type="date" name="{{ field.name }}" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#ffa700] focus:ring-1 focus:ring-[#ffa700] transition text-sm text-gray-800">
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                    {% if field.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <div class="pt-6 flex gap-3">
+                    <button type="submit" class="flex-1 bg-[#ffa700] text-white py-3 rounded-xl font-bold shadow-lg shadow-orange-200 hover:bg-orange-600 transition transform hover:-translate-y-0.5">Save Record</button>
+                    <a href="javascript:history.back()" class="px-6 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50 transition">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-style Django Form Widgets
+    document.querySelectorAll('input:not([type=checkbox]):not([type=date]), textarea, select').forEach(el => {
+        el.classList.add('w-full', 'bg-gray-50', 'border', 'border-gray-200', 'rounded-xl', 'px-4', 'py-2.5', 'focus:outline-none', 'focus:border-[#ffa700]', 'focus:ring-1', 'focus:ring-[#ffa700]', 'transition', 'text-sm', 'text-gray-800');
+    });
+    document.querySelectorAll('input[type=checkbox]').forEach(el => {
+        el.classList.add('w-5', 'h-5', 'text-[#ffa700]', 'rounded', 'focus:ring-[#ffa700]');
+    });
+</script>
+{% endblock %}

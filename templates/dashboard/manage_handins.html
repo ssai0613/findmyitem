@@ -1,0 +1,187 @@
+{% extends 'base_dashboard.html' %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[calc(100vh-140px)]">
+    
+    <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-gray-800">Hand-in Reports</h2>
+            <p class="text-xs text-[#9c9c9c] mt-1">Public reports from the reception desk.</p>
+        </div>
+        
+        <form method="get" class="flex items-center gap-2 w-full md:w-auto">
+            <div class="relative group w-full md:w-64">
+                <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#ffa700] transition"></i>
+                <input type="text" name="q" placeholder="Search Ref Code..." value="{{ request.GET.q }}" 
+                    class="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffa700]/50 focus:border-[#ffa700] transition">
+            </div>
+            <button type="submit" class="bg-gray-900 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition shadow-lg">Filter</button>
+        </form>
+    </div>
+
+    <div class="flex-grow overflow-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead class="bg-gray-50 text-[#9c9c9c] font-semibold uppercase text-xs tracking-wider sticky top-0 z-10">
+                <tr>
+                    <th class="px-6 py-4">Ref Code</th>
+                    <th class="px-6 py-4">Item Details</th>
+                    <th class="px-6 py-4">Finder</th>
+                    <th class="px-6 py-4">Date</th>
+                    <th class="px-6 py-4 text-center">Status</th>
+                    <th class="px-6 py-4 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for report in reports %}
+                <tr class="hover:bg-orange-50/30 transition duration-150">
+                    <td class="px-6 py-4 font-mono font-bold text-gray-700">{{ report.reference_code }}</td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-gray-800">{{ report.item_name }}</div>
+                        <div class="text-xs text-[#9c9c9c]">{{ report.get_category_display }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-400"><i class="fa-solid fa-user"></i></div>
+                            {{ report.finder_name|default:"Anonymous" }}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">{{ report.date_reported|date:"M d, Y" }}</td>
+                    <td class="px-6 py-4 text-center">
+                        {% if report.is_received %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">Received</span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200 animate-pulse">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        {% if not report.is_received %}
+                        
+                        <button 
+                            type="button"
+                            class="bg-[#ffa700] text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-orange-600 transition shadow-md shadow-orange-200/50"
+                            data-ref="{{ report.reference_code }}"
+                            data-item="{{ report.item_name }}"
+                            data-desc="{{ report.description }}"
+                            data-color="{{ report.color }}"
+                            data-loc="{{ report.location_found }}"
+                            data-finder="{{ report.finder_name|default:'Anonymous' }}"
+                            data-url="{% url 'receive_handin' report.id %}"
+                            onclick="openReceiveModal(this)">
+                            Receive
+                        </button>
+                        
+                        {% else %}
+                        <span class="text-[#9c9c9c] text-xs flex items-center justify-end gap-1 font-medium"><i class="fa-solid fa-check-circle"></i> Done</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center text-[#9c9c9c] italic">No reports found matching your query.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="receive-modal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="closeReceiveModal()"></div>
+
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="relative w-full max-w-md transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all border border-gray-100">
+            
+            <div class="h-2 w-full bg-gradient-to-r from-[#ffa700] to-orange-600"></div>
+
+            <button onclick="closeReceiveModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition bg-gray-50 rounded-full w-8 h-8 flex items-center justify-center">
+                <i class="fa-solid fa-times"></i>
+            </button>
+
+            <div class="p-8">
+                <div class="text-center mb-6">
+                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-[#ffa700] text-2xl mb-4 shadow-sm">
+                        <i class="fa-solid fa-box-archive"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900">Confirm Receipt</h3>
+                    <p class="text-xs text-[#9c9c9c] mt-1">You are accepting physical custody of this item.</p>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 space-y-4">
+                    
+                    <div class="flex justify-between items-center border-b border-gray-200 pb-3">
+                        <div>
+                            <p class="text-[10px] font-bold text-[#9c9c9c] uppercase tracking-wider">Reference Code</p>
+                            <p class="text-lg font-mono font-bold text-gray-800" id="modal-ref-code">...</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-bold text-[#9c9c9c] uppercase tracking-wider">Finder</p>
+                            <p class="text-sm font-semibold text-gray-800" id="modal-finder">...</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-[10px] font-bold text-[#9c9c9c] uppercase tracking-wider mb-1">Item Name</p>
+                            <p class="text-sm font-medium text-gray-900" id="modal-item-name">...</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-[#9c9c9c] uppercase tracking-wider mb-1">Color</p>
+                            <p class="text-sm font-medium text-gray-900" id="modal-color">...</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-[10px] font-bold text-[#9c9c9c] uppercase tracking-wider mb-1">Description</p>
+                        <div class="bg-white p-3 rounded-xl border border-gray-200 text-xs text-gray-600 italic leading-relaxed" id="modal-description">
+                            ...
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 text-xs text-gray-500 pt-1">
+                        <i class="fa-solid fa-map-pin text-[#ffa700]"></i>
+                        <span id="modal-location">...</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex gap-3">
+                    <button type="button" onclick="closeReceiveModal()" class="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+                    
+                    <form method="post" id="receive-form" class="flex-1">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full bg-gray-900 text-white py-3 rounded-xl text-sm font-bold shadow-lg hover:bg-black hover:-translate-y-0.5 transition transform">
+                            Confirm
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openReceiveModal(btn) {
+        // 1. Extract data from dataset (No quote issues!)
+        const data = btn.dataset;
+
+        // 2. Update UI
+        document.getElementById('modal-ref-code').textContent = data.ref;
+        document.getElementById('modal-item-name').textContent = data.item;
+        document.getElementById('modal-description').textContent = data.desc;
+        document.getElementById('modal-color').textContent = data.color;
+        document.getElementById('modal-location').textContent = data.loc;
+        document.getElementById('modal-finder').textContent = data.finder;
+        
+        // 3. Set Form Action
+        document.getElementById('receive-form').action = data.url;
+        
+        // 4. Show Modal
+        document.getElementById('receive-modal').classList.remove('hidden');
+    }
+
+    function closeReceiveModal() {
+        document.getElementById('receive-modal').classList.add('hidden');
+    }
+</script>
+{% endblock %}

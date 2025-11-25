@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-slate-50 min-h-screen py-12">
+    <div class="container mx-auto px-6">
+        
+        <div class="text-center max-w-2xl mx-auto mb-16">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4 tracking-tight">Public Archive</h1>
+            <p class="text-[#9c9c9c] text-lg">Browse all recovered items currently held in our custody.</p>
+            
+            <form method="get" class="mt-8 relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-search text-gray-400 group-focus-within:text-[#ffa700] transition"></i>
+                </div>
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search by name, color, or description..." 
+                    class="block w-full pl-11 pr-4 py-4 bg-white border border-gray-200 rounded-2xl leading-5 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ffa700]/50 focus:border-[#ffa700] shadow-sm transition duration-200">
+            </form>
+        </div>
+
+        {% if items %}
+            {% regroup items by get_category_display as category_list %}
+
+            <div class="space-y-16">
+                {% for category in category_list %}
+                <section>
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="h-10 w-1 bg-[#ffa700] rounded-full"></div>
+                        <h2 class="text-2xl font-bold text-gray-800">{{ category.grouper }}</h2>
+                        <span class="text-sm font-medium text-[#9c9c9c] bg-white px-3 py-1 rounded-full border border-gray-100 shadow-sm">
+                            {{ category.list|length }} items
+                        </span>
+                        <div class="h-px bg-gray-200 flex-grow ml-4"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                        {% for item in category.list %}
+                        <div class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300 overflow-hidden flex flex-col h-full">
+                            
+                            <div class="h-56 bg-gray-50 relative overflow-hidden">
+                                {% if item.item_image %}
+                                    <img src="{{ item.item_image.url }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                                {% else %}
+                                    <div class="flex items-center justify-center h-full text-gray-300"><i class="fa-regular fa-image text-4xl"></i></div>
+                                {% endif %}
+                                
+                                <div class="absolute top-3 right-3 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-lg">
+                                    {{ item.date_found|date:"M d" }}
+                                </div>
+                            </div>
+
+                            <div class="p-5 flex-grow flex flex-col">
+                                <h3 class="font-bold text-gray-900 text-lg mb-1 truncate">{{ item.item_name }}</h3>
+                                <div class="flex items-center gap-2 text-xs text-[#9c9c9c] mb-3">
+                                    <i class="fa-solid fa-location-dot text-[#ffa700]"></i> {{ item.location_found }}
+                                </div>
+                                <p class="text-sm text-gray-500 mb-5 line-clamp-2 leading-relaxed">{{ item.description }}</p>
+                                
+                                <a href="{% url 'submit_claim' item.id %}" class="mt-auto block w-full text-center bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-[#ffa700] hover:text-white transition duration-300 shadow-lg shadow-gray-900/10">
+                                    Request Claim
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="text-center py-24 bg-white rounded-3xl border border-dashed border-gray-200">
+                <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-box-open text-4xl text-gray-300"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Archives Empty</h3>
+                <p class="text-[#9c9c9c]">No found items match your search.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

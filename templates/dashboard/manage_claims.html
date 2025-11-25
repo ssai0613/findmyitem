@@ -1,0 +1,101 @@
+{% extends 'base_dashboard.html' %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[calc(100vh-140px)]">
+    
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-gray-800">Claim Requests</h2>
+            <p class="text-xs text-[#9c9c9c] mt-1">Verify ownership proofs.</p>
+        </div>
+        </div>
+
+    <div class="flex-grow overflow-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead class="bg-gray-50 text-[#9c9c9c] font-semibold uppercase text-xs tracking-wider sticky top-0 z-10">
+                <tr>
+                    <th class="px-6 py-4">Item Name</th>
+                    <th class="px-6 py-4">Claimant</th>
+                    <th class="px-6 py-4">Date</th>
+                    <th class="px-6 py-4 text-center">Status</th>
+                    <th class="px-6 py-4 text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for claim in claims %}
+                <tr class="hover:bg-orange-50/30 transition duration-150">
+                    <td class="px-6 py-4 font-bold text-gray-800">{{ claim.found_item.item_name }}</td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-gray-800">{{ claim.claimant.username }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">{{ claim.request_date|date:"M d" }}</td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                            {% if claim.status == 'PENDING' %}bg-yellow-100 text-yellow-800
+                            {% elif claim.status == 'APPROVED' %}bg-green-100 text-green-800
+                            {% elif claim.status == 'REJECTED' %}bg-red-100 text-red-800{% endif %}">
+                            {{ claim.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        {% if claim.status == 'PENDING' %}
+                            <button onclick="openModal('verify-{{ claim.id }}')" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition">
+                                Review Proof
+                            </button>
+                        {% else %}
+                            <span class="text-gray-300">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <div id="verify-{{ claim.id }}" class="fixed inset-0 bg-gray-900/70 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
+                        
+                        <div class="bg-gray-900 px-6 py-4 flex justify-between items-center text-white shrink-0">
+                            <h3 class="font-bold text-lg">Verification Console</h3>
+                            <button onclick="closeModal('verify-{{ claim.id }}')" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                        </div>
+
+                        <div class="p-6 overflow-y-auto grow grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                <h4 class="text-xs font-bold text-gray-400 uppercase mb-3">Official Record</h4>
+                                {% if claim.found_item.item_image %}
+                                    <img src="{{ claim.found_item.item_image.url }}" class="w-full h-40 object-contain bg-white rounded border mb-3">
+                                {% endif %}
+                                <div class="space-y-2 text-sm text-gray-700">
+                                    <p><span class="font-bold">Desc:</span> {{ claim.found_item.description }}</p>
+                                    <p><span class="font-bold">Color:</span> {{ claim.found_item.color }}</p>
+                                    <p><span class="font-bold">Loc:</span> {{ claim.found_item.location_found }}</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                                <h4 class="text-xs font-bold text-yellow-700 uppercase mb-3">Claimant Statement</h4>
+                                {% if claim.proof_image %}
+                                    <img src="{{ claim.proof_image.url }}" class="w-full h-40 object-contain bg-white rounded border mb-3 cursor-pointer" onclick="window.open(this.src)">
+                                {% else %}
+                                    <div class="h-40 bg-yellow-100 rounded mb-3 flex items-center justify-center text-yellow-700 text-xs">No Photo Proof</div>
+                                {% endif %}
+                                <div class="bg-white p-3 rounded border border-yellow-100 text-sm text-gray-800 italic">
+                                    "{{ claim.proof_of_ownership }}"
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end gap-3 shrink-0">
+                            <a href="{% url 'process_claim' claim.id 'reject' %}" onclick="return confirm('Reject this claim?')" class="px-6 py-2 rounded-xl border border-red-200 text-red-600 font-bold hover:bg-red-50 transition">Reject</a>
+                            <a href="{% url 'process_claim' claim.id 'approve' %}" onclick="return confirm('Approve and Release item?')" class="px-6 py-2 rounded-xl bg-green-600 text-white font-bold hover:bg-green-700 transition shadow-lg">Approve & Release</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+</script>
+{% endblock %}
