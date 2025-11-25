@@ -22,12 +22,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-2rbv(laga+158r#2$28q-dii9(0$mv9hfl$c7@cqu9yz_$5q&n'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'default-unsafe-key-for-dev')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = 'RENDER' not in os.environ
 DEBUG = True
 
 ALLOWED_HOSTS = []
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 
 # Application definition
@@ -45,6 +49,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -77,14 +82,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'findmyitem_db',
-        'USER': 'postgres',       # Default postgres user
-        'PASSWORD': 'Secret1303.', # <--- PUT YOUR PASSWORD HERE
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600
+    )
 }
 
 
@@ -122,8 +123,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# MOVE THIS LINE OUT of the 'if' block. It must be here ALWAYS.
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') 
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+# Keep the storage engine inside the check (optional, but good practice)
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Redirects after login/logout
 LOGIN_REDIRECT_URL = 'home'
@@ -149,3 +161,9 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'findmyitemsystem@gmail.com'  # <--- Put your actual Gmail address here
 EMAIL_HOST_PASSWORD = 'pfid rcgk xblf izro'
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://findmyitem-web.onrender.com', 
+    # ^^^ IMPORTANT: Replace this with your EXACT Render website URL. 
+    # Note: It MUST start with 'https://' and have NO trailing slash '/'.
+]
